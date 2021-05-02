@@ -1,0 +1,87 @@
+<!--
+ * @Author: zhang_gen_yuan
+ * @Date: 2021-05-01 19:03:48
+ * @LastEditTime: 2021-05-02 14:56:13
+ * @Descripttion: 
+-->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>海量点</title>
+    <link rel="stylesheet" href="./map.css">
+</head>
+
+<body>
+    <div id="container" class="map" tabindex="0"></div>
+    <div class="input-card">
+    </div>
+    <script type="text/javascript"
+        src="https://webapi.amap.com/maps?v=1.4.15&key=501a4475db7dda17872651e4b1e99245"></script>
+    <script src="./axios.min.js"></script>
+    <script type="text/javascript">
+        console.time()
+        // http://222.143.32.87:8080/api/ins-org/org
+        var myCitys;
+        axios.get('/selectLocated.json', {
+            params: {
+                deptId: '1208591793196716033'
+            }
+        }).then((res) => {
+            if (res.data.code == 200) {
+                myCitys = res.data.data;
+                myCitys.forEach(item => {
+                    item.lnglat = [item.lng, item.lat];
+                })
+                var map = new AMap.Map('container', {
+                    zoom: 11,
+                    center: [114.52, 35.58]
+                });
+
+                var style = [{
+                    // url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fy2.ifengimg.com%2Fnews_spider%2Fdci_2012%2F09%2F3fc6c9fb4a9e50a87da46995c3a19752.jpg&refer=http%3A%2F%2Fy2.ifengimg.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1622467719&t=070938dcb3e75ada02282cfd087c34fd',
+                    url:'./img/dingwei.png',
+                    anchor: new AMap.Pixel(6, 6),
+                    size: new AMap.Size(21, 21)
+                },
+                    // {
+                    //     url: 'https://a.amap.com/jsapi_demos/static/images/mass1.png',
+                    //     anchor: new AMap.Pixel(4, 4),
+                    //     size: new AMap.Size(7, 7)
+                    // }, 
+                    // {
+                    //     url: 'https://a.amap.com/jsapi_demos/static/images/mass2.png',
+                    //     anchor: new AMap.Pixel(3, 3),
+                    //     size: new AMap.Size(5, 5)
+                    // }
+                ];
+
+                var mass = new AMap.MassMarks(myCitys, {
+                    opacity: 0.8,
+                    zIndex: 111,
+                    cursor: 'pointer',
+                    style: style
+                });
+                var marker = new AMap.Marker({ content: ' ', map: map });
+                mass.on('mouseover', function (e) {
+                    marker.setPosition(e.data.lnglat);
+                    marker.setLabel({ content: e.data.name })
+                });
+                mass.setMap(map);
+                function setStyle(multiIcon) {
+                    if (multiIcon) {
+                        mass.setStyle(style);
+                    } else {
+                        mass.setStyle(style[2]);
+                    }
+                }
+                console.timeEnd()
+            }
+        }).catch((err) => {
+        });
+    </script>
+</body>
+
+</html>
